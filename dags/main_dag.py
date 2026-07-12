@@ -25,7 +25,7 @@ def fintech_dag():
         
         @task
         def upload_to_s3(file_path: str, ds=None) -> None:
-            upload_file(LOCAL_FILE_PATH, BUCKET, f"generated_transactions_{ds}.csv")
+            upload_file(file_path, BUCKET, f"generated_transactions_{ds}.csv")
 
         execute_query = SQLExecuteQueryOperator(
         task_id="execute_query",
@@ -39,4 +39,4 @@ def fintech_dag():
         upload_step = upload_to_s3(generated_file_path)
         upload_step >> execute_query
 
-    fintech_dag()
+fintech_dag()
