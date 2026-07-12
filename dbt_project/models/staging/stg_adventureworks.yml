@@ -9,7 +9,7 @@ sources:
       - name: SalesOrderDetail
       - name: Customer
       - name: SalesTerritory
-
+ 
   - name: aws_adventureworks__production
     database: ADVENTUREWORKS
     schema: PRODUCTION
