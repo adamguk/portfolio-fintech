@@ -1,11 +1,15 @@
 from airflow.sdk import dag, task
 from pendulum import datetime
 from scripts.transaction_generator import generate_fintech_data
+from scripts.test_csv_quality import csv_quality_check as run_quality_check
 from scripts.s3_upload import upload_file
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from dotenv import load_dotenv
+import os
 
-LOCAL_FILE_PATH = "/tmp/mock_transactions.csv"
-BUCKET = "mys3bucket"
+load_dotenv()
+
+LOCAL_FILE_PATH = os.getenv("LOCAL_FILE_PATH")
 
 @dag(
     dag_id="fintech_dag",
@@ -24,8 +28,13 @@ def fintech_dag():
             return LOCAL_FILE_PATH
         
         @task
+        def file_quality_check(file_path: str) -> str:
+             run_quality_check(file_path)
+             return file_path
+        
+        @task
         def upload_to_s3(file_path: str, ds=None) -> None:
-            upload_file(file_path, BUCKET, f"generated_transactions_{ds}.csv")
+            upload_file(file_path,f"generated_transactions_{ds}.csv")
 
         execute_query = SQLExecuteQueryOperator(
         task_id="execute_query",
@@ -36,7 +45,8 @@ def fintech_dag():
         )
 
         generated_file_path = transaction_generator()
-        upload_step = upload_to_s3(generated_file_path)
+        validated_file = file_quality_check(generated_file_path)
+        upload_step = upload_to_s3(validated_file)
         upload_step >> execute_query
 
 fintech_dag()

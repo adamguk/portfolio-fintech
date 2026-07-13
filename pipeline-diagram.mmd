@@ -1,0 +1,27 @@
+---
+id: 3f9e1795-2333-495c-91cc-0812bd0f3735
+---
+flowchart LR
+    subgraph Apache Airflow
+        A[T1: Python Generator]
+        C[T2: Python Quality Check]
+
+        subgraph AWS S3
+            D[(T3: Copy to S3 Store)]
+            G[Marts: Business Tables]
+        end
+
+        subgraph Snowflake
+            E[T4: COPY INTO Table]
+                subgraph DBT
+                    F[T5: Generate Models]
+                end
+        end
+
+        subgraph Looker
+            H[Visualisations]
+        end
+    end
+
+    A -->|Local CSV Output|C --> D
+    D --> E --> F --> G --> H

@@ -1,10 +1,14 @@
 import logging
 import boto3
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
-def upload_file(file_name, bucket, object_name=None):
+bucket = os.getenv("AWS_S3_BUCKET")
+
+def upload_file(file_name, object_name=None):
     if object_name is None:
         object_name = os.path.basename(file_name)
 

@@ -40,5 +40,8 @@ def csv_quality_check(file_path:str) -> bool:
     if (~df["card_type"].isin(accepted_card_types)).any():
         raise ValueError (f"Data validation failed: File {file_path} column 'card_type' contains unrecognised card_type")
     
+    accepted_merchant_categories = ["Groceries","Entertainment","Transport","Shopping","Dining"]
+    if (~df["merchant_category"].isin(accepted_merchant_categories)).any():
+        raise ValueError (f"Data validation failed: File {file_path} column 'merchany category' contains unrecognised categories")
     
     return True 
