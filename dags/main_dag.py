@@ -1,14 +1,16 @@
 from airflow.sdk import dag, task
 from pendulum import datetime
-from scripts.transaction_generator import generate_fintech_data
-from scripts.test_csv_quality import csv_quality_check as run_quality_check
-from scripts.s3_upload import upload_file
+from dags.scripts.transaction_generator import generate_fintech_data
+from dags.scripts.test_csv_quality import csv_quality_check as run_quality_check
+from dags.scripts.s3_upload import upload_file
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 
 load_dotenv()
 
+SCRIPTS_DIR = os.path.join(Path(__file__).parent, "scripts")
 LOCAL_FILE_PATH = os.getenv("LOCAL_FILE_PATH")
 
 @dag(
@@ -17,7 +19,7 @@ LOCAL_FILE_PATH = os.getenv("LOCAL_FILE_PATH")
     schedule="@daily",
     doc_md=__doc__, 
     catchup=False,
-    template_searchpath="/opt/airflow/scripts",
+    template_searchpath=[SCRIPTS_DIR],
     default_args={"owner": "Astro", "retries": 3},
 )
 
