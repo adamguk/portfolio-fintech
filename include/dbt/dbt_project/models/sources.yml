@@ -1,0 +1,43 @@
+version: 2
+
+sources:
+  - name: snowflake_sources      
+    database: FINTECH
+    schema: RAW
+    tables:
+      - name: RAW_TRANSACTIONS
+        columns:
+          - name: AMOUNT
+            data_tests:
+              - not_null
+
+          - name: CARD_TYPE
+            data_tests:
+              - not_null
+              - accepted_values:
+                    values: ["Visa", "Mastercard", "Amex"]
+
+          - name: CURRENCY
+            data_tests:
+              - not_null
+
+          - name: MERCHANT
+            data_tests:
+              - not_null
+
+          - name: MERCHANT_CATEGORY
+            data_tests:
+              - not_null
+
+          - name: TIMESTAMP
+            data_tests:
+              - not_null
+
+          - name: TRANSACTION_ID
+            data_tests:
+              - unique
+              - not_null
+              
+          - name: USER_ID
+            data_tests:
+              - not_null

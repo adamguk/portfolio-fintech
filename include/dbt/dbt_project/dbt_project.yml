@@ -17,7 +17,13 @@ models:
   dbt_project:
     staging:
       +materialized: view
+      +schema: RAW
     intermediate:
       +materialized: table
+      +schema: INT
     marts:
       +materialized: table
+      +schema: MART
+
+vars:
+  "dbt_date:time_zone": "Europe/London"

@@ -6,12 +6,25 @@ from dags.scripts.s3_upload import upload_file
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from dotenv import load_dotenv
 from pathlib import Path
+from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, ExecutionConfig
+from cosmos.profiles import SnowflakeUserPasswordProfileMapping
 import os
 
 load_dotenv()
 
 SCRIPTS_DIR = os.path.join(Path(__file__).parent, "scripts")
 LOCAL_FILE_PATH = os.getenv("LOCAL_FILE_PATH")
+SF_CONN_ID = os.getenv("AIRFLOW_SNOWFLAKE_CONN_ID")
+DBT_PROJECT_PATH = f"{os.environ['AIRFLOW_HOME']}/include/dbt/dbt_project"
+
+profile_config = ProfileConfig(
+    profile_name="default",
+    target_name="dev",
+    profile_mapping=SnowflakeUserPasswordProfileMapping(
+        conn_id=SF_CONN_ID,
+        profile_args={"schema": "ANALYTICS"},
+    ),
+)
 
 @dag(
     dag_id="fintech_dag",
@@ -40,15 +53,23 @@ def fintech_dag():
 
         execute_query = SQLExecuteQueryOperator(
         task_id="execute_query",
-        conn_id ="snowflake_default",
-        sql='s3_copy_into_snowflake_stage.sql',
+        conn_id =SF_CONN_ID,
+        sql="populate_snowflake_raw.sql",
         split_statements=True,
         return_last=False,
         )
 
+        transform_data = DbtTaskGroup(
+        group_id="transform_data",
+        project_config=ProjectConfig(DBT_PROJECT_PATH),
+        profile_config=profile_config,
+        default_args={"retries": 2},
+        )
+             
+
         generated_file_path = transaction_generator()
         validated_file = file_quality_check(generated_file_path)
         upload_step = upload_to_s3(validated_file)
-        upload_step >> execute_query
+        upload_step >> execute_query >> transform_data
 
 fintech_dag()
