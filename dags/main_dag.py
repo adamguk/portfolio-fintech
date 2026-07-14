@@ -27,13 +27,14 @@ profile_config = ProfileConfig(
 )
 
 @dag(
-    dag_id="fintech_dag",
-    start_date=datetime(2026, 7, 12),
+    dag_id="fintech_dag_v2",
+    start_date=datetime(2026, 1, 1),
     schedule="@daily",
     doc_md=__doc__, 
-    catchup=False,
+    catchup=True,
     template_searchpath=[SCRIPTS_DIR],
-    default_args={"owner": "Astro", "retries": 3},
+    default_args={"owner": "Astro", "retries": 3,'depends_on_past': True,},
+    max_active_runs=6
 )
 
 def fintech_dag():

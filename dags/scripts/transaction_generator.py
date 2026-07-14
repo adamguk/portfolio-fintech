@@ -9,12 +9,14 @@ def generate_fintech_data(filename="mock_transactions.csv", num_rows=1000):
         "Entertainment": ["Netflix", "Spotify", "Cineworld", "Steam"],
         "Transport": ["Uber", "TfL", "Trainline", "Shell"],
         "Shopping": ["Amazon", "ASOS", "Argos", "Currys"],
-        "Dining": ["Deliveroo", "JustEast", "Starbucks", "Nandos"]
+        "Dining": ["Deliveroo", "JustEast", "Starbucks", "Nandos"],
+        "Home": ["Mortgage","Rent","Insurance","Utilities"]
+
     }
     
     headers = ["transaction_id", "user_id", "timestamp", "amount", "currency", "merchant", "merchant_category", "card_type"]
     
-    start_time = datetime.now() - timedelta(days=7)
+    start_time = datetime.now() - timedelta(days=1)
     
     # Generate a pool of 50 unique user IDs
     user_pool = [str(uuid.uuid4())[:8] for _ in range(50)]
