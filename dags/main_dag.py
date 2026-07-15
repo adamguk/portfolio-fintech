@@ -9,6 +9,7 @@ from pathlib import Path
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, ExecutionConfig
 from cosmos.profiles import SnowflakeUserPasswordProfileMapping
 import os
+from plugins.notifier_email import send_failure_email
 
 load_dotenv()
 
@@ -33,8 +34,13 @@ profile_config = ProfileConfig(
     doc_md=__doc__, 
     catchup=True,
     template_searchpath=[SCRIPTS_DIR],
-    default_args={"owner": "Astro", "retries": 3,'depends_on_past': True,},
-    max_active_runs=6
+    max_active_runs=6,
+
+    default_args={
+         "owner": "Astro",
+          "retries": 3,
+          'depends_on_past': True,
+          'on_failure_callback': send_failure_email('system-monitor@adamg.io')},
 )
 
 def fintech_dag():
