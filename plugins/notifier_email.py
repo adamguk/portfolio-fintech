@@ -1,21 +1,15 @@
-from airflow.providers.standard.operators.email import EmailNotifier
+from airflow.providers.smtp.notifications.smtp import send_smtp_notification
 
-def get_failure_notifier(to_email):
-    return EmailNotifier(
-        to = to_email,
-        subject = (f"Airflow Notification: {ti.dag_name} Failed"),
-        html_contents = 
-            """
-            <h2>Task Failure Notification</h2>
-            <p>DAG: {{ti.dag_id}}</p>
-            <p>Task: {{ti.task_id}}</p>
-            <p>Run Date: {{ds}}</p>
-            <p>Log: <a href = "{{ti.log_url}}"<a/>
-            """
+def send_failure_email(to_email: str):
+    return send_smtp_notification(
+        from_email="system-monitor@adamg.io",
+        to=to_email,
+        subject="Airflow Notification: {{ ti.dag_id }} Failed",
+        html_content="""
+        <h2>Task Failure Notification</h2>
+        <p><b>DAG:</b> {{ ti.dag_id }}</p>
+        <p><b>Task:</b> {{ ti.task_id }}</p>
+        <p><b>Run Date:</b> {{ ds }}</p>
+        <p><b>Log:</b> <a href="{{ ti.log_url }}">View Airflow Logs</a></p>
+        """
     )
-
-
-
-
-
-

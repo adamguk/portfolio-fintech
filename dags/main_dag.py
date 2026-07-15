@@ -40,7 +40,7 @@ profile_config = ProfileConfig(
          "owner": "Astro",
           "retries": 3,
           'depends_on_past': True,
-          'on_failure_callback': send_failure_email('system-monitor@adamg.io')},
+          'on_failure_callback': send_failure_email("system-monitor@adamg.io")},
 )
 
 def fintech_dag():
@@ -71,8 +71,7 @@ def fintech_dag():
         project_config=ProjectConfig(DBT_PROJECT_PATH),
         profile_config=profile_config,
         default_args={"retries": 2},
-        )
-             
+        )   
 
         generated_file_path = transaction_generator()
         validated_file = file_quality_check(generated_file_path)
