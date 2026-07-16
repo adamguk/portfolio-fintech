@@ -4,6 +4,7 @@ from dags.scripts.transaction_generator import generate_fintech_data
 from dags.scripts.test_csv_quality import csv_quality_check as run_quality_check
 from dags.scripts.s3_upload import upload_file
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from dotenv import load_dotenv
 from pathlib import Path
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, ExecutionConfig
@@ -58,6 +59,16 @@ def fintech_dag():
         def upload_to_s3(file_path: str, ds=None) -> None:
             upload_file(file_path,f"generated_transactions_{ds}.csv")
 
+        s3_file_check = S3KeySensor(
+            task_id="sensor_one_key",
+            bucket_name=os.getenv("AWS_S3_BUCKET"),
+            bucket_key="generated_transactions_{{ ds }}.csv",
+            aws_conn_id="aws_default",
+            timeout=600,
+            poke_interval=30,
+            mode="poke",
+        )   
+
         execute_query = SQLExecuteQueryOperator(
         task_id="execute_query",
         conn_id =SF_CONN_ID,
@@ -76,6 +87,6 @@ def fintech_dag():
         generated_file_path = transaction_generator()
         validated_file = file_quality_check(generated_file_path)
         upload_step = upload_to_s3(validated_file)
-        upload_step >> execute_query >> transform_data
+        upload_step >> s3_file_check >> execute_query >> transform_data
 
 fintech_dag()

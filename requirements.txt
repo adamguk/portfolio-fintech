@@ -2,5 +2,6 @@
 snowflake-connector-python
 apache-airflow-providers-common-sql
 apache-airflow-providers-snowflake
+apache-airflow-providers-amazon
 astronomer-cosmos
 dbt-snowflake
